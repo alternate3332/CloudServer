@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+<!--
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src *; img-src *; frame-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval' 'unsafe-inline' *;">
+-->
+</head>
+
+<body>
+
+<!--
+<form action="/" method="post" enctype="multipart/form-data">
+  <input name="userfile[]" type="file" multiple><br>      
+	<input id="submitBtn"type="submit">
+</form>
+-->
+
+<input id="input" type="file" multiple />
+<br>
+<div style="width: 80vw; height:5vh; border: solid 1px;">
+<div id="div" style="width: 0%; height:5vh; background-color: blue" />
+</div>
+<text id="text">init</text>
+<script>
+
+	const NODE_SERVER="/POST";
+
+	var input = document.getElementById("input");
+	input.addEventListener("change", (e)=>{
+		readFiles(e.target.files);
+	}, false);
+
+	async function readFiles(files){
+		var div = document.getElementById("div");
+		var text = document.getElementById("text");
+		var length = files.length;
+		for(var i = 0; i < length; i++){
+			var res = await sendFile(files[i]);
+			var prog = 100*(i+1) / length + "%";
+			div.style.setProperty("width", prog);
+			text.innerHTML = `${i+1} / ${length}`;
+			
+		}
+	}
+
+	function sendFile(file){
+		return new Promise(function(resolve, reject){
+		
+		var fr = new FileReader();
+
+		fr.onload = function(){
+			var data = {};
+			data.name = file.name;
+			data.data = fr.result;
+
+			fetch(NODE_SERVER, {
+				method: "POST",
+				headers: {
+					"Content-Type" : "text/plain"
+				},
+				body: JSON.stringify(data)
+			}).then(function(){
+				resolve("ok");
+			}).catch(function(err){
+				resolve("ok");
+			});
+		}
+
+		fr.readAsDataURL(file);
+		});
+	}
+
+</script>
+</body>
+</html>
